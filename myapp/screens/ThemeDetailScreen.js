@@ -10,6 +10,7 @@ import {
   Linking,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
 import { themes } from '../themes/themeColors';
 
 const { width } = Dimensions.get('window');
@@ -22,23 +23,30 @@ export default function ThemeDetailScreen({ route }) {
   const openCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      alert('Permission denied');
+      alert('Camera permission denied');
       return;
     }
 
     const result = await ImagePicker.launchCameraAsync();
     if (!result.canceled) {
-      console.log('Captured image:', result.assets[0].uri);
-      Alert.alert('Photo captured!', result.assets[0].uri);
+      Alert.alert('Photo Captured', result.assets[0].uri);
+    }
+  };
+
+  const playMusic = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('../assets/music/theme.mp3')  // Make sure the file exists
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.error('Error playing music', error);
+      Alert.alert('Error', 'Could not play music.');
     }
   };
 
   const openSettings = () => {
     Linking.openSettings();
-  };
-
-  const playMusic = () => {
-    Alert.alert('Music', '🎵 Playing music...');
   };
 
   return (
@@ -110,9 +118,7 @@ export default function ThemeDetailScreen({ route }) {
             </View>
 
             <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Text
-                style={[styles.linkText, { color: theme.primary, marginTop: 20 }]}
-              >
+              <Text style={[styles.linkText, { color: theme.primary, marginTop: 20 }]}>
                 Close
               </Text>
             </TouchableOpacity>
